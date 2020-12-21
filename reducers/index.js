@@ -1,23 +1,24 @@
-const initialState = {
-    name : 'donghyi.seo',
-    age : 27,
-    password : 'babo'
-}
-const changeNickname = (data) => {
-    return {
-        type : 'CHANGE_NICKNAME',
-        data,
-    }
-}
-changeNickname('boogicho');
+import { HYDRATE } from "next-redux-wrapper";
+import { combineReducers } from "redux";
+import user from './user';
+import post from  './post';
 
-const rootReducer = (state =initialState, action) => {
-    switch (action.type){
-        case 'CHANGE_NICKNAME' :
-            return {
-                ...state,
-                name : action.data,
-            }
-    }
-}
+/**
+ * combineReducers
+ * reducer 분리된 것을 합쳐준다
+ * Hydrate 는 next.js에서 redux를 사용하기 위함.
+ */
+const rootReducer = combineReducers ({
+    index : (state={}, action) => {
+        switch (action.type){
+            case HYDRATE:
+                console.log('HYDRATE', action);
+                return {...state, ...action.payload};
+            default :
+                return state;
+        }
+    },
+    user,
+    post
+})
 export default rootReducer;

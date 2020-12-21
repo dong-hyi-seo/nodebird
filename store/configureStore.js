@@ -1,15 +1,15 @@
 const {createWrapper} = require('next-redux-wrapper')
-import {createStore} from 'redux';
+import {applyMiddleware, compose, createStore} from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension'
 
 import reducer from '../reducers';
 
 const configureStore = () => {
-    const store = createStore(reducer, enhancer)
-    store.dispatch({
-        type : 'CHANGE_NICKNAME',
-        data : 'boogicho'
-    })
-    return store;
+    const middlewares = [];
+    const enhancer = process.env.NODE_ENV === 'production'
+    ? compose(applyMiddleware(...middlewares))
+        : composeWithDevTools(applyMiddleware(...middlewares))
+    return createStore(reducer, enhancer);
 };
 
 const wrapper = createWrapper(configureStore, {
