@@ -17,13 +17,13 @@ export const initialState = {
         Comments : [
             {
                 User : {
-                    nicknam : 'nero'
+                    nickname : 'nero'
                 },
                 content : '우와 개정판 나왔네'
             },
             {
                 User : {
-                    nicknam : 'nero1'
+                    nickname : 'nero1'
                 },
                 content : '우와 개정판 나왔네 ㅊㅋ ㅊㅋ'
             }
