@@ -1,5 +1,13 @@
 import { all, fork, put, takeLatest, delay} from 'redux-saga/effects';
 import axios from "axios";
+import {
+    LOG_IN_FAILURE,
+    LOG_IN_REQUEST,
+    LOG_IN_SUCCESS,
+    LOG_OUT_FAILURE,
+    LOG_OUT_REQUEST,
+    LOG_OUT_SUCCESS, SIGN_UP_FAILURE, SIGN_UP_REQUEST, SIGN_UP_SUCCESS
+} from "../reducers/user";
 
 /** === redux saga effects list ===
  * all : 동시실행
@@ -20,12 +28,12 @@ function* logIn(action) {
         //const result = yield call(logInAPI, action.data);
         yield delay(1000); //api가아닌 더미데이터 사용시 임시
         yield put({
-            type : 'LOG_IN_SUCCESS',
-            data : result.data
+            type : LOG_IN_SUCCESS,
+            data : action.data
         });
     }catch(err){
         yield put({
-            type : 'LOG_IN_FAILURE',
+            type : LOG_IN_FAILURE,
             data : err.response.data
         });
     }
@@ -40,22 +48,42 @@ function* logOut() {
         //const result = yield call(logOutAPI);
         yield delay(1000); //api가아닌 더미데이터 사용시 임시
         yield put({
-            type : 'LOG_OUT_SUCCESS',
-            data : result.data
+            type : LOG_OUT_SUCCESS,
         });
     }catch(err){
         yield put({
-            type : 'LOG_OUT_FAILURE',
+            type : LOG_OUT_FAILURE,
             data : err.response.data
         });
     }
 }
 
+function* signUp() {
+    try{
+        //const result = yield call(logOutAPI);
+        yield delay(1000); //api가아닌 더미데이터 사용시 임시
+        yield put({
+            type : SIGN_UP_SUCCESS,
+        });
+    }catch(err){
+        yield put({
+            type : SIGN_UP_FAILURE,
+            data : err.response.data
+        });
+    }
+}
+
+/**
+ * event 리스너 역할 수행
+ */
 function* watchLogin() {
-    yield takeLatest('LOG_IN_REQUEST', logIn);
+    yield takeLatest(LOG_IN_REQUEST, logIn);
 }
 function* watchLogOut() {
-    yield takeLatest('LOG_OUT_REQUEST', logOut)
+    yield takeLatest(LOG_OUT_REQUEST, logOut)
+}
+function* watchSignUp() {
+    yield takeLatest(SIGN_UP_REQUEST, signUp)
 }
 
 //generator saga
@@ -63,5 +91,6 @@ export default function* userSaga() {
     yield all([
         fork(watchLogin),
         fork(watchLogOut),
+        fork(watchSignUp)
     ])
 }
