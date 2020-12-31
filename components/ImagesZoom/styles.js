@@ -1,5 +1,5 @@
-import styled, {createGlobalStyle} from "styled-components";
-import {CloseOutlined} from "@ant-design/icons";
+import styled, { createGlobalStyle } from 'styled-components';
+import { CloseOutlined } from '@ant-design/icons';
 
 export const Overlay = styled.div`
   position: fixed;
@@ -70,7 +70,7 @@ export const Indicator = styled.div`
     font-size: 15px;
   }
 `;
-/*라이브러리 이미 설정된 css를 덮어버린다.*/
+/* 라이브러리 이미 설정된 css를 덮어버린다. */
 export const Global = createGlobalStyle`
   .slick-slide {
     display: inline-block;
