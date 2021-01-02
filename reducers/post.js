@@ -1,5 +1,6 @@
 import shortId from 'shortid';// 매번 다른 값을 주는 라이브러리
 import produce from 'immer';
+import faker from 'faker';
 
 export const initialState = {
   mainPosts: [{
@@ -37,6 +38,10 @@ export const initialState = {
     ],
   }],
   imagePaths: [],
+  hasMorePosts: true,
+  loadPostDone: false,
+  loadPostLoading: false,
+  loadPostError: null,
   addPostDone: false,
   addPostLoading: false,
   addPostError: null,
@@ -48,6 +53,29 @@ export const initialState = {
   addCommentError: null,
 
 };
+
+export const generateDummyPost = (number) => Array(number).fill().map(() => ({
+  id: shortId.generate(),
+  User: {
+    id: shortId.generate(),
+    nickname: faker.name.findName(),
+  },
+  content: faker.lorem.paragraph(),
+  Images: [{
+    src: faker.image.imageUrl(),
+  }],
+  Comments: [{
+    User: {
+      id: shortId.generate(),
+      nickname: faker.name.findName(),
+    },
+    content: faker.lorem.paragraph(),
+  }],
+}));
+
+export const LOAD_POST_REQUEST = 'LOAD_POST_REQUEST';
+export const LOAD_POST_SUCCESS = 'LOAD_POST_SUCCESS';
+export const LOAD_POST_FAILURE = 'LOAD_POST_FAILURE';
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -89,6 +117,21 @@ const dummyComment = (data) => ({
 // 이전 상태를 액션을 통해 다음상태로 만들어내는 함수(불변성을 지킴)
 const reducer = (state = initialState, action) => produce(state, (draft) => { // immer를 사용하여 불변성 규칙을 편하게 코딩
   switch (action.type) {
+    case LOAD_POST_REQUEST:
+      draft.loadPostLoading = true;
+      draft.loadPostDone = false;
+      draft.loadPostError = null;
+      break;
+    case LOAD_POST_SUCCESS:
+      draft.loadPostLoading = false;
+      draft.loadPostDone = true;
+      draft.mainPosts = action.data.concat(draft.mainPosts);
+      draft.hasMorePosts = draft.mainPosts.length < 50;
+      break;
+    case LOAD_POST_FAILURE:
+      draft.loadPostLoading = false;
+      draft.loadPostError = action.error;
+      break;
     case ADD_POST_REQUEST:
       draft.addPostLoading = true;
       draft.addPostDone = false;
@@ -97,7 +140,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) => { //
     case ADD_POST_SUCCESS:
       draft.addPostLoading = false;
       draft.addPostDone = true;
-      draft.mainPosts.unshift(dummyPost(action.data), ...state.mainPosts);
+      draft.mainPosts.unshift(dummyPost(action.data));
       break;
     case ADD_POST_FAILURE:
       draft.addPostLoading = false;
