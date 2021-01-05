@@ -6,11 +6,13 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
+        modelName: 'Hashtag',
+        tableName: 'hashtags',
         charset: 'utf8',
         collate: 'utf8_general_ci',
     });
     Hashtag.associate = (db) => {
-        db.Hashtag.belongsToMany(db.Post);
+        db.Hashtag.belongsToMany(db.Post, { through: 'PostHashtag' });
     };
     return Hashtag;
 }

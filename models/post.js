@@ -6,12 +6,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
     }, {
+        modelName: 'Post',
+        tableName: 'posts',
         charset: 'utf8mb4', //한글 + 이모티콘까지 넣으려면 해당 charset 해야함.
         collate: 'utf8mb4_general_ci',
     });
     Post.associate = (db) => {
         db.Post.belongsTo(db.User); //User와 1:다
-        db.Post.belongsToMany(db.Hashtag); //다 대 다 개념
+        db.Post.belongsToMany(db.Hashtag, { through: 'PostHashtag' }); //다 대 다 개념
         db.Post.hasMany(db.Comment);
         db.Post.hasMany(db.Image);
 
