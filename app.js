@@ -1,8 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const postRouter = require('./routes/post');
 const userRouter = require('./routes/user');
 const db = require('./models')
+const passportConfig = require('./passport');
 const app = express();
 
 //sequelize가 model에 정의해둔대로 테이블을 생성해준다
@@ -12,6 +15,7 @@ db.sequelize.sync()
     .then(() => {
         console.log('db 연결 성공');
     }).catch(console.error);
+passportConfig();
 
 //request body json, urlencoded 설정 (단, 아래 router 설정보다 먼서 설정해주어야함)
 app.use(cors({
@@ -19,6 +23,10 @@ app.use(cors({
 })); //Access Allow cross origin 설정
 app.use(express.json());//req json type
 app.use(express.urlencoded({ extended: true })); //form type
+app.use(cookieParser);
+app.use(session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/post', postRouter); //postRouter에 prefix 설정
 app.use('/user', userRouter);

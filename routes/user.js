@@ -1,8 +1,32 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { User } = require('../models');
+const passport = require('passport');
 
-const router = express.Router();
+const router =  express.Router();
+
+/**
+ * POST user login
+ */
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            console.error(err);
+            return next(err);
+        }
+        if (info) {
+            //status code 401: 로그인이 잘못되었을때..
+            return res.status(401).send(info.reason);
+        }
+        return req.login(user, async (loginErr) => {
+            if (loginErr) {
+                console.error(loginErr);
+                return next(loginErr);
+            }
+            return res.status(200).json(user);
+        })
+    })(req, res, next);
+});
 router.post('/',async (req, res, next) => {
     try {
         const exUser = await User.findOne({
