@@ -29,16 +29,15 @@ import {
  * put : dispatch 개념이라고 생각하면됨.
  */
 function logInAPI(data) {
-  return axios.post('/api/login', data);
+  return axios.post('/user/login', data);
 }
 
 function* logIn(action) {
   try {
-    // const result = yield call(logInAPI, action.data);
-    yield delay(1000); // api가아닌 더미데이터 사용시 임시
+    const result = yield call(logInAPI, action.data);
     yield put({
       type: LOG_IN_SUCCESS,
-      data: action.data,
+      data: result.data,
     });
   } catch (err) {
     console.error(err);
@@ -49,14 +48,13 @@ function* logIn(action) {
   }
 }
 
-function logOutAPI() {
-  return axios.post('/api/logout');
+function logOutAPI(data) {
+  return axios.post('/user/logout', data);
 }
 
-function* logOut() {
+function* logOut(action) {
   try {
-    // const result = yield call(logOutAPI);
-    yield delay(1000); // api가아닌 더미데이터 사용시 임시
+    const result = yield call(logOutAPI, action.data);
     yield put({
       type: LOG_OUT_SUCCESS,
     });
@@ -70,12 +68,11 @@ function* logOut() {
 }
 
 function signUpAPI(data) {
-  return axios.post('http://localhost:3065/user', data);
+  return axios.post('/user', data);
 }
 function* signUp(action) {
   try {
     const result = yield call(signUpAPI, action.data);
-    console.log('result = ', result);
     yield put({
       type: SIGN_UP_SUCCESS,
     });
