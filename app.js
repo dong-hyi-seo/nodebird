@@ -3,9 +3,11 @@ const cors = require('cors');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 const passport = require('passport');
 const postRouter = require('./routes/post');
 const userRouter = require('./routes/user');
+const postsRouter = require('./routes/posts');
 const db = require('./models')
 const passportConfig = require('./passport');
 
@@ -20,10 +22,13 @@ db.sequelize.sync()
     }).catch(console.error);
 passportConfig();
 
+//morgan : 요청오는 로그를 더 잘보여줌
+app.use(morgan('dev'));
+
 //request body json, urlencoded 설정 (단, 아래 router 설정보다 먼서 설정해주어야함)
 app.use(cors({
-    origin : 'http://localhost:3000',
-    credential: true, //api, front간의 도메인이 다를경우 쿠키도 전달이안됨. 해결은 해당 옵션 추가
+    origin: 'http://localhost:3060',
+    credentials: true,
 })); //Access Allow cross origin 설정
 app.use(express.json());//req json type
 app.use(express.urlencoded({ extended: true })); //form type
@@ -38,6 +43,7 @@ app.use(passport.session());
 
 app.use('/post', postRouter); //postRouter에 prefix 설정
 app.use('/user', userRouter);
+app.use('/posts', postsRouter);
 
 app.listen(3065, () => {
     console.log('서버 실행 중 !!');
