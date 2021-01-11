@@ -16,11 +16,8 @@ const PostForm = () => {
   }, [addPostDone]);
 
   const onSubmit = useCallback(() => {
-    dispatch({
-      type: ADD_POST_REQUEST,
-      data: text,
-    });
-  }, [text, imagePaths]);
+    dispatch(addPost(text));
+  }, [text]);
 
   const imageInput = useRef();
   const onClickImageUpload = useCallback(() => {

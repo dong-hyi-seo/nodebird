@@ -40,10 +40,10 @@ function* logIn(action) {
       data: result.data,
     });
   } catch (err) {
-    console.error(err);
+    console.error('login error = ', err.response.data);
     yield put({
       type: LOG_IN_FAILURE,
-      data: err.response.data,
+      error: err.response.data,
     });
   }
 }
@@ -54,7 +54,7 @@ function logOutAPI(data) {
 
 function* logOut(action) {
   try {
-    const result = yield call(logOutAPI, action.data);
+    yield call(logOutAPI, action.data);
     yield put({
       type: LOG_OUT_SUCCESS,
     });
@@ -62,7 +62,7 @@ function* logOut(action) {
     console.error(err);
     yield put({
       type: LOG_OUT_FAILURE,
-      data: err.response.data,
+      error: err.response.data,
     });
   }
 }

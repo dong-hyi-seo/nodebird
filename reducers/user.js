@@ -1,6 +1,9 @@
 import produce from 'immer';
 
 export const initialState = {
+  loadUserLoading: false,
+  loadUserDone: false,
+  loadUserError: null,
   followLoading: false,
   followDone: false,
   followError: null,
@@ -9,7 +12,7 @@ export const initialState = {
   unfollowError: null,
   logInLoading: false, // 로그인 시도중
   logInDone: false,
-  logInError: null, // 로그아웃 시도중
+  logInError: null,
   logOutLoading: false,
   logOutDone: false,
   logOutError: null,
@@ -23,6 +26,9 @@ export const initialState = {
   signUpData: {},
   loginData: {},
 };
+export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_REQUEST';
+export const LOAD_USER_FAILURE = 'LOAD_USER_REQUEST';
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
@@ -51,14 +57,6 @@ export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
 export const REMOVE_POST_OF_ME = 'REMOVE_POST_OF_ME';
 
-const dummyUser = (data) => ({
-  ...data,
-  nickname: '제로초',
-  id: 1,
-  Posts: [{ id: 1 }],
-  Followings: [{ nickname: '부기초' }, { nickname: 'Chanho Lee' }, { nickname: 'neue zeal' }],
-  Followers: [{ nickname: '부기초' }, { nickname: 'Chanho Lee' }, { nickname: 'neue zeal' }],
-});
 export const loginRequestAction = (data) => ({
   type: LOG_IN_REQUEST,
   data,
@@ -68,6 +66,20 @@ export const logoutRequestAction = () => ({
 });
 const reducer = (state = initialState, action) => produce(state, (draft) => {
   switch (action.type) {
+    case LOAD_USER_REQUEST:
+      draft.loadUserLoading = true;
+      draft.loadUserDone = false;
+      draft.loadUserError = null;
+      break;
+    case LOAD_USER_SUCCESS:
+      draft.loadUserLoading = false;
+      draft.loadUserDone = true;
+      draft.loadUserError = null;
+      break;
+    case LOAD_USER_FAILURE:
+      draft.loadUserLoading = false;
+      draft.loadUserError = action.error;
+      break;
     case FOLLOW_REQUEST:
       draft.followLoading = true;
       draft.followDone = false;
@@ -104,9 +116,10 @@ const reducer = (state = initialState, action) => produce(state, (draft) => {
     case LOG_IN_SUCCESS:
       draft.logInLoading = false;
       draft.logInDone = true;
-      draft.me = dummyUser(action.data);
+      draft.me = action.data;
       break;
     case LOG_IN_FAILURE:
+      console.log('action.error = ', action.error);
       draft.logInLoading = false;
       draft.logInError = action.error;
       break;
