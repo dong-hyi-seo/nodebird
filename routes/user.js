@@ -1,14 +1,32 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { User } = require('../models');
+const { User, Post } = require('../models');
 const passport = require('passport');
-
 const router =  express.Router();
+
+//미들웨어
+const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+
+router.get('/', async (req, res, next) => {
+    try {
+        if (req.user) {
+            const user = await User.findOne({
+                where: { id: req.user.id }
+            })
+            res.status(200).json(user);
+        }else{
+            res.status(200).json(null);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+})
 
 /**
  * POST user login
  */
-router.post('/login', (req, res, next) => {
+router.post('/login', isNotLoggedIn, (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             console.error(err);
@@ -16,6 +34,7 @@ router.post('/login', (req, res, next) => {
         }
         if (info) {
             //status code 401: 로그인이 잘못되었을때..
+            console.log("info.reason = ",info.reason);
             return res.status(401).send(info.reason);
         }
         return req.login(user, async (loginErr) => {
@@ -23,11 +42,33 @@ router.post('/login', (req, res, next) => {
                 console.error(loginErr);
                 return next(loginErr);
             }
-            return res.status(200).json(user);
+            const fullUserWithoutPassword = await User.findOne({
+                where: { id: user.id },
+                attributes: {
+                    exclude: ['password']
+                },
+                include: [{
+                    model: Post,
+                },{
+                    model: User,
+                    as: 'Followings',
+                }, {
+                    model: User,
+                    as: 'Followers',
+                }]
+            })
+            return res.status(200).json(fullUserWithoutPassword);
         })
     })(req, res, next);
 });
-router.post('/',async (req, res, next) => {
+
+router.post('/logout', isLoggedIn, (req, res) => {
+    req.logout();
+    req.session.destroy();
+    res.send('ok');
+})
+
+router.post('/',isNotLoggedIn, async (req, res, next) => {
     try {
         const exUser = await User.findOne({
             where: {
