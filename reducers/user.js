@@ -27,8 +27,8 @@ export const initialState = {
   loginData: {},
 };
 export const LOAD_USER_REQUEST = 'LOAD_USER_REQUEST';
-export const LOAD_USER_SUCCESS = 'LOAD_USER_REQUEST';
-export const LOAD_USER_FAILURE = 'LOAD_USER_REQUEST';
+export const LOAD_USER_SUCCESS = 'LOAD_USER_SUCCESS';
+export const LOAD_USER_FAILURE = 'LOAD_USER_FAILURE';
 
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
@@ -73,8 +73,8 @@ const reducer = (state = initialState, action) => produce(state, (draft) => {
       break;
     case LOAD_USER_SUCCESS:
       draft.loadUserLoading = false;
+      draft.me = action.data;
       draft.loadUserDone = true;
-      draft.loadUserError = null;
       break;
     case LOAD_USER_FAILURE:
       draft.loadUserLoading = false;

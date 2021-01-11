@@ -1,5 +1,4 @@
 import axios from 'axios';
-import shortId from 'shortid';
 import { all, delay, fork, put, takeLatest, throttle, call } from 'redux-saga/effects';
 import {
   ADD_COMMENT_FAILURE,
@@ -7,13 +6,13 @@ import {
   ADD_COMMENT_SUCCESS,
   ADD_POST_FAILURE,
   ADD_POST_REQUEST,
-  ADD_POST_SUCCESS, generateDummyPost,
+  ADD_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS,
   LOAD_POST_FAILURE,
   LOAD_POST_REQUEST,
   LOAD_POST_SUCCESS,
   REMOVE_POST_FAILURE,
   REMOVE_POST_REQUEST,
-  REMOVE_POST_SUCCESS,
+  REMOVE_POST_SUCCESS, UNLIKE_POST_FAILURE, UNLIKE_POST_REQUEST, UNLIKE_POST_SUCCESS,
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
 
@@ -27,13 +26,54 @@ import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
  * throttle : 시간설정을주어 그시간동안 1번만 수행되도록 함
  * put : dispatch 개념이라고 생각하면됨.
  */
+function unlikePostAPI(data) {
+  return axios.delete(`/post/${data}/like`);
+}
+
+function* unlikePost(action) {
+  try {
+    const result = yield call(unlikePostAPI, action.data);
+    yield put({
+      type: UNLIKE_POST_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    yield put({
+      type: UNLIKE_POST_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function likePostAPI(data) {
+  return axios.patch(`/post/${data}/like`, data);
+}
+
+function* likePost(action) {
+  try {
+    const result = yield call(likePostAPI, action.data);
+    yield put({
+      type: LIKE_POST_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    yield put({
+      type: LIKE_POST_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
+function loadPostAPI() {
+  return axios.get('/posts');
+}
+
 function* loadPost(action) {
   try {
-    // const result = yield call(addPostAPI, action.data);
-    yield delay(1000); // api 가아닌 더미데이터 사용시 임시
+    const result = yield call(loadPostAPI);
     yield put({
       type: LOAD_POST_SUCCESS,
-      data: generateDummyPost(10),
+      data: result.data,
     });
   } catch (err) {
     yield put({
@@ -78,6 +118,7 @@ function* addComment(action) {
       data: result.data,
     });
   } catch (err) {
+    console.error(err);
     yield put({
       type: ADD_COMMENT_FAILURE,
       error: err.response.data,
@@ -108,7 +149,12 @@ function* removePost(action) {
     });
   }
 }
-
+function* watchUnlikePost() {
+  yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
+}
+function* watchLikePost() {
+  yield takeLatest(LIKE_POST_REQUEST, likePost);
+}
 function* watchLoadPost() {
   yield throttle(5000, LOAD_POST_REQUEST, loadPost);
 }
@@ -125,6 +171,8 @@ function* watchRemovePost() {
 // generator saga
 export default function* postSaga() {
   yield all([
+    fork(watchUnlikePost),
+    fork(watchLikePost),
     fork(watchLoadPost),
     fork(watchAddPost),
     fork(watchRemovePost),

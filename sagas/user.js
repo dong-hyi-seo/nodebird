@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   FOLLOW_FAILURE,
   FOLLOW_REQUEST,
-  FOLLOW_SUCCESS,
+  FOLLOW_SUCCESS, LOAD_USER_FAILURE, LOAD_USER_REQUEST, LOAD_USER_SUCCESS,
   LOG_IN_FAILURE,
   LOG_IN_REQUEST,
   LOG_IN_SUCCESS,
@@ -28,6 +28,27 @@ import {
  * throttle : 시간설정을주어 그시간동안 1번만 수행되도록 함
  * put : dispatch 개념이라고 생각하면됨.
  */
+function loadUserAPI() {
+  return axios.get('/user');
+}
+
+function* loadUser(action) {
+  try {
+    console.log('loadUser');
+    const result = yield call(loadUserAPI);
+    yield put({
+      type: LOAD_USER_SUCCESS,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error(err);
+    yield put({
+      type: LOAD_USER_FAILURE,
+      error: err.response.data,
+    });
+  }
+}
+
 function logInAPI(data) {
   return axios.post('/user/login', data);
 }
@@ -128,6 +149,9 @@ function* unfollow(action) {
 /**
  * event 리스너 역할 수행
  */
+function* watchLoadUser() {
+  yield takeLatest(LOAD_USER_REQUEST, loadUser);
+}
 function* watchFollow() {
   yield takeLatest(FOLLOW_REQUEST, follow);
 }
@@ -147,6 +171,7 @@ function* watchSignUp() {
 // generator saga
 export default function* userSaga() {
   yield all([
+    fork(watchLoadUser),
     fork(watchFollow),
     fork(watchUnfollow),
     fork(watchLogin),
