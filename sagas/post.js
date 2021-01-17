@@ -127,15 +127,14 @@ function* addComment(action) {
 }
 
 function removePostAPI(data) {
-  return axios.delete('/api/post');
+  return axios.delete(`/post/${data}`);
 }
 function* removePost(action) {
   try {
-    // const result = yield call(removePostAPI, action.data);
-    yield delay(1000); // api가아닌 더미데이터 사용시 임시
+    const result = yield call(removePostAPI, action.data);
     yield put({
       type: REMOVE_POST_SUCCESS,
-      data: action.data,
+      data: result.data,
     });
     yield put({
       type: REMOVE_POST_OF_ME,
