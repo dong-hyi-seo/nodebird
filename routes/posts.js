@@ -10,6 +10,7 @@ router.get('/', async (req, res, next) => {
             where.id = { [Op.lt]: parseInt(req.query.lastId, 10)}
         } // 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
         const posts = await Post.findAll({
+            where,
             limit: 10,
             order: [
                 ['createdAt', 'DESC'],
