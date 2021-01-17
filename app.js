@@ -3,6 +3,7 @@ const cors = require('cors');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const path = require('path');
 const morgan = require('morgan');
 const passport = require('passport');
 const postRouter = require('./routes/post');
@@ -30,6 +31,7 @@ app.use(cors({
     origin: 'http://localhost:3060',
     credentials: true,
 })); //Access Allow cross origin 설정
+app.use('/', express.static(path.join(__dirname, 'uploads')))
 app.use(express.json());//req json type
 app.use(express.urlencoded({ extended: true })); //form type
 app.use(cookieParser('nodebirdsecret'));
