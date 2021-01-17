@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
+import axios from 'axios';
+import { END } from 'redux-saga';
 import AppLayout from '../components/AppLayout';
 import PostForm from '../components/PostForm';
 import PostCard from '../components/PostCard';
 import { LOAD_POST_REQUEST } from '../reducers/post';
-import { LOAD_USER_REQUEST } from '../reducers/user';
+import { LOAD_MY_INFO_REQUEST, LOAD_USER_REQUEST } from '../reducers/user';
+import wrapper from '../store/configureStore';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -19,15 +21,6 @@ const Home = () => {
   }, [retweetError]);
 
   useEffect(() => {
-    dispatch({
-      type: LOAD_USER_REQUEST,
-    });
-    dispatch({
-      type: LOAD_POST_REQUEST,
-    });
-  }, []);
-
-  useEffect(() => {
     /**
      * 1. 스크롤이벤트가 엄청빠르게 발생되어 LOAD_POST_REQUEST 이벤트가 많이발생됨
      * 한번만 발생되도록 할려면 ? - loading state값 가지고 구분
@@ -39,8 +32,10 @@ const Home = () => {
     function onScroll() {
       if (window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
         if (hasMorePosts && !loadPostLoading) {
+          const lastId = mainPosts[mainPosts.length - 1].id;
           dispatch({
             type: LOAD_POST_REQUEST,
+            lastId,
           });
         }
       }
@@ -61,4 +56,23 @@ const Home = () => {
     </AppLayout>
   );
 };
+
+export const getServerSideProps = wrapper.getServerSideProps(async (context) => {
+  const cookie = context.req ? context.req.headers.cookie : '';
+
+  // 쿠키공유방지 (내아이디로 다른사람이 로그인이 될 수 있음)
+  axios.defaults.headers.Cookie = '';
+  if (context.req && cookie) {
+    axios.defaults.headers.Cookie = cookie;
+  }
+
+  context.store.dispatch({
+    type: LOAD_MY_INFO_REQUEST,
+  });
+  context.store.dispatch({
+    type: LOAD_POST_REQUEST,
+  });
+  context.store.dispatch(END); // success 될때까지 기다다
+  await context.store.sagaTask.toPromise();
+});
 export default Home;

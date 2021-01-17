@@ -13,6 +13,7 @@ const PostImages = ({ images }) => {
     setShowImagesZoom(false);
   }, []);
 
+  console.log('images = ', images);
   if (images.length === 1) {
     return (
       <>
