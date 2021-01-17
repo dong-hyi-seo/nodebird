@@ -86,7 +86,7 @@ router.post('/logout', isLoggedIn, (req, res) => {
     res.send('ok');
 })
 
-router.post('/',isNotLoggedIn, async (req, res, next) => {
+router.post('/', isNotLoggedIn, async (req, res, next) => {
     try {
         const exUser = await User.findOne({
             where: {
@@ -110,6 +110,19 @@ router.post('/',isNotLoggedIn, async (req, res, next) => {
         console.error(error);
         next(error); //500 http status (서버에러)
     }
-})
+});
 
+router.patch('/nickname', isLoggedIn, async (req, res, next ) => {
+    try {
+        await User.update({
+            nickname: req.body.nickname,
+        },{
+            where: {id: req.user.id},
+        });
+        res.status(200).json({nickname: req.body.nickname});
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+})
 module.exports = router;
